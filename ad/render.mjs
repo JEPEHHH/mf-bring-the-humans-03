@@ -119,7 +119,7 @@ function renderSceneClip(scene, durationSec, env, pack, spec, outPath) {
 
   // Optional atmospheric official press-pack background (softly dimmed to keep high text contrast)
   if (scene.background_asset && pack.assets[scene.background_asset]) {
-    inputs.push('-loop', '1', '-t', String(durationSec), '-i', pack.assets[scene.background_asset].path);
+    inputs.push('-framerate', String(fps), '-loop', '1', '-t', String(durationSec), '-i', pack.assets[scene.background_asset].path);
     const bgIdx = inputIdx++;
     chains.push(
       `[${bgIdx}:v]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,eq=brightness=-0.34:saturation=0.85,format=rgba[envbg]`,
@@ -138,12 +138,12 @@ function renderSceneClip(scene, durationSec, env, pack, spec, outPath) {
 
   // Official site screenshot framed cleanly inside safe zone (unmodified aspect ratio)
   if (scene.screenshot_asset && pack.assets[scene.screenshot_asset]) {
-    inputs.push('-loop', '1', '-t', String(durationSec), '-i', pack.assets[scene.screenshot_asset].path);
+    inputs.push('-framerate', String(fps), '-loop', '1', '-t', String(durationSec), '-i', pack.assets[scene.screenshot_asset].path);
     const shotIdx = inputIdx++;
-    const shotW = 680;
-    const shotH = 425; // exact 2880x1800 -> 16:10 ratio = 680x425
+    const shotW = 656;
+    const shotH = 410; // exact 2880x1800 -> 16:10 ratio = 656x410
     const shotX = 120;
-    const shotY = 820;
+    const shotY = 795;
     chains.push(
       `[${cur}]drawbox=x=${shotX - 5}:y=${shotY - 5}:w=${shotW + 10}:h=${shotH + 10}:color=${magentaHex}:t=fill[framebg]`,
       `[${shotIdx}:v]scale=${shotW}:${shotH}:flags=lanczos,format=rgba[shot]`,
@@ -154,7 +154,7 @@ function renderSceneClip(scene, durationSec, env, pack, spec, outPath) {
 
   // Official mascot illustration (aspect ratio strictly preserved via scale=W:-1 or -1:H, never cropped or recoloured)
   if (scene.mascot_asset && pack.assets[scene.mascot_asset]) {
-    inputs.push('-loop', '1', '-t', String(durationSec), '-i', pack.assets[scene.mascot_asset].path);
+    inputs.push('-framerate', String(fps), '-loop', '1', '-t', String(durationSec), '-i', pack.assets[scene.mascot_asset].path);
     const mascotIdx = inputIdx++;
 
     let scaleExpr;
@@ -162,19 +162,19 @@ function renderSceneClip(scene, durationSec, env, pack, spec, outPath) {
     let yExpr;
     if (scene.screenshot_asset) {
       // Companion mascot beside the lower-right corner of the screenshot, inside safe zone width
-      scaleExpr = 'scale=230:-1:flags=lanczos';
-      xExpr = '725';
-      yExpr = '1030+10*sin(2*PI*t/1.8)';
+      scaleExpr = 'scale=220:-1:flags=lanczos';
+      xExpr = '728';
+      yExpr = '985+8*sin(2*PI*t/1.8)';
     } else if (scene.cta_pill) {
       // Hero celebratory ghost pile under CTA button
       scaleExpr = 'scale=-1:470:flags=lanczos';
       xExpr = '(W-w)/2';
-      yExpr = '990+10*sin(2*PI*t/2.0)';
+      yExpr = '975+10*sin(2*PI*t/2.0)';
     } else {
       // Opening hero mascot centered clearly below headline
-      scaleExpr = 'scale=540:-1:flags=lanczos';
+      scaleExpr = 'scale=500:-1:flags=lanczos';
       xExpr = '(W-w)/2';
-      yExpr = '850+14*sin(2*PI*t/1.7)';
+      yExpr = '810+12*sin(2*PI*t/1.7)';
     }
 
     chains.push(
@@ -196,49 +196,51 @@ function renderSceneClip(scene, durationSec, env, pack, spec, outPath) {
     );
   }
 
-  // Headline lines (crisp punchy white typography, staggered quick reveal)
+  // Headline lines (show full opening hook on frame 0 for strong TikTok cover thumbnail; stagger later scenes)
+  const isOpeningScene = scene.start_s === 0;
   const headlineLines = scene.headline ?? [];
   headlineLines.forEach((line, idx) => {
-    const yPos = 516 + idx * 78;
-    const appear = (idx * 0.14).toFixed(2);
+    const yPos = 512 + idx * 74;
+    const appear = isOpeningScene ? '0.00' : (idx * 0.12).toFixed(2);
     textOps.push(
-      `drawtext=fontfile='${monoExtra}':text='${escapeDrawtext(line)}':fontsize=62:fontcolor=${whiteHex}:shadowcolor=${inkHex}@0.85:shadowx=3:shadowy=4:x=148:y=${yPos}:enable='gte(t,${appear})'`,
+      `drawtext=fontfile='${monoExtra}':text='${escapeDrawtext(line)}':fontsize=60:fontcolor=${whiteHex}:shadowcolor=${inkHex}@0.85:shadowx=3:shadowy=4:x=148:y=${yPos}:enable='gte(t,${appear})'`,
     );
   });
 
   // Subline lines (clear, high-contrast explanation of make.fun)
   const sublineLines = scene.subline ?? [];
-  const subBaseY = 516 + headlineLines.length * 78 + 20;
+  const subBaseY = 512 + headlineLines.length * 74 + 16;
   sublineLines.forEach((line, idx) => {
-    const yPos = subBaseY + idx * 48;
-    const appear = (0.28 + idx * 0.12).toFixed(2);
+    const yPos = subBaseY + idx * 44;
+    const appear = (isOpeningScene ? 0.16 + idx * 0.12 : 0.24 + idx * 0.12).toFixed(2);
     textOps.push(
-      `drawtext=fontfile='${sansBold}':text='${escapeDrawtext(line)}':fontsize=34:fontcolor=${whiteHex}:shadowcolor=${inkHex}@0.8:shadowx=2:shadowy=3:x=148:y=${yPos}:enable='gte(t,${appear})'`,
+      `drawtext=fontfile='${sansBold}':text='${escapeDrawtext(line)}':fontsize=33:fontcolor=${whiteHex}:shadowcolor=${inkHex}@0.8:shadowx=2:shadowy=3:x=148:y=${yPos}:enable='gte(t,${appear})'`,
     );
   });
 
   // Prominent CTA pill on the closing action scene
   if (scene.cta_pill) {
     const ctaX = 120;
-    const ctaY = 832;
+    const ctaY = 815;
     const ctaW = 840;
     const ctaH = 98;
     textOps.push(
-      `drawbox=x=${ctaX}:y=${ctaY}:w=${ctaW}:h=${ctaH}:color=${magentaHex}:t=fill:enable='gte(t,0.35)'`,
-      `drawbox=x=${ctaX}:y=${ctaY}:w=${ctaW}:h=${ctaH}:color=${whiteHex}:t=4:enable='gte(t,0.35)'`,
-      `drawtext=fontfile='${monoBold}':text='${escapeDrawtext(scene.cta_pill)}':fontsize=35:fontcolor=${whiteHex}:x=${ctaX}+(${ctaW}-text_w)/2:y=${ctaY}+(${ctaH}-text_h)/2:enable='gte(t,0.35)'`,
+      `drawbox=x=${ctaX}:y=${ctaY}:w=${ctaW}:h=${ctaH}:color=${magentaHex}:t=fill:enable='gte(t,0.30)'`,
+      `drawbox=x=${ctaX}:y=${ctaY}:w=${ctaW}:h=${ctaH}:color=${whiteHex}:t=4:enable='gte(t,0.30)'`,
+      `drawtext=fontfile='${monoBold}':text='${escapeDrawtext(scene.cta_pill)}':fontsize=35:fontcolor=${whiteHex}:x=${ctaX}+(${ctaW}-text_w)/2:y=${ctaY}+(${ctaH}-text_h)/2:enable='gte(t,0.30)'`,
     );
   }
 
-  // Subtle bottom safe-zone footer tag naming make.fun cleanly on non-CTA scenes
+  // Safe-zone footer tag naming make.fun cleanly inside y <= 1248 on non-CTA scenes
   if (!scene.cta_pill) {
     textOps.push(
-      `drawtext=fontfile='${monoBold}':text='make.fun  //  real bounties for AI agents':fontsize=24:fontcolor=${whiteHex}@0.88:x=120:y=1285`,
+      `drawtext=fontfile='${monoBold}':text='make.fun  //  real bounties for AI agents':fontsize=22:fontcolor=${whiteHex}@0.90:x=120:y=1222`,
     );
   }
 
   chains.push(`[${cur}]${textOps.join(',')},format=yuv420p[vout]`);
 
+  const exactFrames = Math.round(durationSec * fps);
   const args = [
     '-y',
     '-hide_banner',
@@ -249,14 +251,18 @@ function renderSceneClip(scene, durationSec, env, pack, spec, outPath) {
     chains.join(';'),
     '-map',
     '[vout]',
-    '-t',
-    String(durationSec),
+    '-frames:v',
+    String(exactFrames),
     '-r',
     String(fps),
     '-c:v',
     'libx264',
     '-preset',
     'medium',
+    '-bf',
+    '0',
+    '-g',
+    '60',
     '-crf',
     '16',
     '-pix_fmt',
