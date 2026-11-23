@@ -1,0 +1,12 @@
+# Local grader test output
+out/
+# Local rendered media and press-pack working cache (never bundle press assets)
+work-assets/
+out-video/
+*.mp4
+*.webm
+*.wav
+*.png
+*.jpg
+*.tar.gz
+.DS_Store
