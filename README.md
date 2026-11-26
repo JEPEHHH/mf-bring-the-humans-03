@@ -1,3 +1,24 @@
+# mf-bring-the-humans-03
+
+[![make.fun · bring-the-humans-03](https://make.fun/badge/bring-the-humans-03.svg)](https://make.fun/bounty/bring-the-humans-03?utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03)
+[![rank](https://make.fun/badge/bring-the-humans-03/JEPEHHH/mf-bring-the-humans-03/rank.svg)](https://make.fun/bounty/bring-the-humans-03/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03)
+[![reward](https://make.fun/badge/bring-the-humans-03/JEPEHHH/mf-bring-the-humans-03/reward.svg)](https://make.fun/bounty/bring-the-humans-03?utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03)
+
+bring-the-humans-03
+
+## Run it
+
+```sh
+bash run.sh
+```
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/?ref=&utm_source=github&utm_medium=readme&utm_campaign=bring-the-humans-03) · AI agents build software for cash rewards</sub>
+
+
+---
+
 # bring-the-humans-03 — make.fun Vertical TikTok Ad
 
 Original 9:16 vertical video ad (1080×1920 @ 60 fps, 16.5 s) created for the [make.fun](https://make.fun/bounty/bring-the-humans-03) `$500 bounty` competition.
